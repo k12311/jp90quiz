@@ -2,95 +2,157 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <title>日文單字測驗</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5; }
-        h1 { color: #333; }
-        .card { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-        .question { font-size: 24px; margin-bottom: 10px; }
-        .options button {
-            display: block;
-            margin: 5px 0;
-            padding: 10px;
-            width: 100%;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .correct { background-color: #c8f7c5; }
-        .incorrect { background-color: #f7c5c5; }
-    </style>
+  <meta charset="UTF-8">
+  <title>日文單字互動測驗</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+    h1 { text-align: center; }
+    .card { background: white; padding: 20px; margin: 20px 0; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .question { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+    .options button {
+      display: block;
+      margin: 5px 0;
+      padding: 10px;
+      width: 100%;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .correct { background-color: #c8f7c5; }
+    .incorrect { background-color: #f7c5c5; }
+    #result { text-align: center; font-size: 20px; margin-top: 30px; }
+    #restart-btn {
+      margin: 20px auto;
+      display: block;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
-<h1>日文 ➝ 中文 測驗</h1>
-
+<h1>日文 ➝ 中文 單字測驗</h1>
 <div id="quiz"></div>
+<div id="result"></div>
+<button id="restart-btn" onclick="location.reload()" style="display:none;">重新測驗</button>
 
 <script>
-    const quizData = [
-        { jp: "食べます", zh: "吃" },
-        { jp: "飲みます", zh: "喝" },
+const quizData = [
+    { jp: "食べます", zh: "吃" },
+        { jp: "飲みます", zh: "飲料" },
+        { jp: "吸います", zh: "吸" },
         { jp: "見ます", zh: "看" },
         { jp: "聞きます", zh: "聽" },
+        { jp: "読みます", zh: "閱讀" },
+        { jp: "書きます", zh: "書寫" },
+        { jp: "買います", zh: "購買" },
+        { jp: "撮ります", zh: "拍照" },
+        { jp: "します", zh: "做" },
+        { jp: "会います", zh: "見面" },
         { jp: "ごはん", zh: "白飯" },
+        { jp: "あさごはん", zh: "早餐" },
+        { jp: "ひるごはん", zh: "午餐" },
+        { jp: "ばんごはん", zh: "晚餐" },
+        { jp: "パン", zh: "麵包" },
+        { jp: "たまご", zh: "蛋" },
+        { jp: "にく", zh: "肉" },
+        { jp: "さかな", zh: "魚" },
+        { jp: "やさい", zh: "蔬菜" },
+        { jp: "くだもの", zh: "水果" },
         { jp: "みず", zh: "水" },
         { jp: "おちゃ", zh: "茶" },
-        { jp: "ジュース", zh: "果汁" }
-    ];
+        { jp: "こうちゃ", zh: "紅茶" },
+        { jp: "ぎゅうにゅう", zh: "牛奶" },
+        { jp: "ジュース", zh: "果汁" },
+        { jp: "ビール", zh: "啤酒" },
+        { jp: "おさけ", zh: "日本酒" },
+        { jp: "たばこ", zh: "香煙" },
+        { jp: "てがみ", zh: "信" },
+        { jp: "ほうこく", zh: "報告" },
+        { jp: "しゃしん", zh: "照片" },
+        { jp: "ビデオ", zh: "影片" },
+        { jp: "みせ", zh: "商店" },
+        { jp: "にわ", zh: "庭院" },
+        { jp: "しゅくだい", zh: "作業" },
+        { jp: "テニス", zh: "網球" },
+        { jp: "サッカー", zh: "足球" },
+        { jp: "はなみ", zh: "賞花" },
+        { jp: "なに", zh: "什麼" },
+        { jp: "いっしょに", zh: "一起" },
+        { jp: "ちょっと", zh: "一點點" },
+        { jp: "いつも", zh: "一直都是" },
+        { jp: "ときどき", zh: "有時" },
+        { jp: "それから", zh: "然後" },
+        { jp: "ええ", zh: "是的" },
+        { jp: "いいですね", zh: "好啊" },
+        { jp: "わかりました", zh: "我明白了" },
+        { jp: "なんですか", zh: "有什麼事？" },
+        { jp: "じゃ、また", zh: "那麼，再見" }
+];
 
-    const allOptions = quizData.map(q => q.zh);
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
 
-    function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+function createQuiz() {
+  let score = 0;
+  shuffle(quizData);
+  const allOptions = quizData.map(item => item.zh);
+  const quizContainer = document.getElementById("quiz");
+
+  quizData.forEach((item, index) => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const question = document.createElement("div");
+    question.className = "question";
+    question.textContent = (index + 1) + ". " + item.jp;
+
+    const optionsDiv = document.createElement("div");
+    optionsDiv.className = "options";
+
+    let options = [item.zh];
+    while (options.length < 4) {
+      const opt = allOptions[Math.floor(Math.random() * allOptions.length)];
+      if (!options.includes(opt)) options.push(opt);
+    }
+
+    shuffle(options);
+    options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.textContent = opt;
+      btn.onclick = () => {
+        if (opt === item.zh) {
+          btn.classList.add("correct");
+          score++;
+        } else {
+          btn.classList.add("incorrect");
         }
-    }
+        Array.from(optionsDiv.children).forEach(b => b.disabled = true);
+        if (index === quizData.length - 1) {
+          document.getElementById("result").textContent = "你答對了 " + score + " / " + quizData.length + " 題";
+          document.getElementById("restart-btn").style.display = "block";
+        }
+      };
+      optionsDiv.appendChild(btn);
+    });
 
-    function createQuiz() {
-        const container = document.getElementById("quiz");
-        quizData.forEach((q, index) => {
-            const card = document.createElement("div");
-            card.className = "card";
+    card.appendChild(question);
+    card.appendChild(optionsDiv);
+    quizContainer.appendChild(card);
+  });
+}
 
-            const question = document.createElement("div");
-            question.className = "question";
-            question.textContent = `${index + 1}. ${q.jp}`;
-
-            const optionsDiv = document.createElement("div");
-            optionsDiv.className = "options";
-
-            let options = [q.zh];
-            while (options.length < 4) {
-                const opt = allOptions[Math.floor(Math.random() * allOptions.length)];
-                if (!options.includes(opt)) options.push(opt);
-            }
-
-            shuffle(options);
-            options.forEach(opt => {
-                const btn = document.createElement("button");
-                btn.textContent = opt;
-                btn.onclick = () => {
-                    if (opt === q.zh) {
-                        btn.className = "correct";
-                    } else {
-                        btn.className = "incorrect";
-                    }
-                    Array.from(optionsDiv.children).forEach(b => b.disabled = true);
-                };
-                optionsDiv.appendChild(btn);
-            });
-
-            card.appendChild(question);
-            card.appendChild(optionsDiv);
-            container.appendChild(card);
-        });
-    }
-
-    createQuiz();
+createQuiz();
 </script>
 
 </body>
