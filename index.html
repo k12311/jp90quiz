@@ -3,135 +3,150 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>日文單字互動測驗</title>
+  <title>日文單字互動測驗（選擇模式）</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-    h1 { text-align: center; }
-    .card { background: white; padding: 20px; margin: 20px 0; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .question { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+    .card, .menu { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin: 20px auto; max-width: 600px; }
+    .question { font-size: 22px; font-weight: bold; margin-bottom: 10px; }
     .options button {
-      display: block;
-      margin: 5px 0;
-      padding: 10px;
-      width: 100%;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      cursor: pointer;
+      display: block; margin: 5px 0; padding: 10px; width: 100%; font-size: 16px;
+      border: 1px solid #ccc; border-radius: 5px; cursor: pointer;
     }
-    .correct { background-color: #c8f7c5; }
-    .incorrect { background-color: #f7c5c5; }
+    .correct { background: #c8f7c5; }
+    .incorrect { background: #f7c5c5; }
     #result { text-align: center; font-size: 20px; margin-top: 30px; }
     #restart-btn {
-      margin: 20px auto;
-      display: block;
-      padding: 10px 20px;
-      font-size: 18px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+      margin: 20px auto; display: block; padding: 10px 20px; font-size: 18px;
+      background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;
     }
+    label { display: block; margin: 10px 0 5px; }
+    select, button.start { font-size: 16px; padding: 8px; width: 100%; }
   </style>
 </head>
 <body>
 
-<h1>日文 ➝ 中文 單字測驗</h1>
+<div class="menu" id="menu">
+  <h2>你想怎麼測驗？</h2>
+  <label>出題順序：</label>
+  <select id="mode-order">
+    <option value="sequential">照順序出題</option>
+    <option value="random">亂數抽題</option>
+  </select>
+  <label>翻譯方向：</label>
+  <select id="mode-direction">
+    <option value="jp-zh">日 ➝ 中（顯示日文）</option>
+    <option value="zh-jp">中 ➝ 日（顯示中文）</option>
+  </select>
+  <button class="start" onclick="startQuiz()">開始測驗</button>
+</div>
+
 <div id="quiz"></div>
 <div id="result"></div>
 <button id="restart-btn" onclick="location.reload()" style="display:none;">重新測驗</button>
 
 <script>
-const quizData = [
-    { jp: "食べます", zh: "吃" },
-        { jp: "飲みます", zh: "飲料" },
-        { jp: "吸います", zh: "吸" },
-        { jp: "見ます", zh: "看" },
-        { jp: "聞きます", zh: "聽" },
-        { jp: "読みます", zh: "閱讀" },
-        { jp: "書きます", zh: "書寫" },
-        { jp: "買います", zh: "購買" },
-        { jp: "撮ります", zh: "拍照" },
-        { jp: "します", zh: "做" },
-        { jp: "会います", zh: "見面" },
-        { jp: "ごはん", zh: "白飯" },
-        { jp: "あさごはん", zh: "早餐" },
-        { jp: "ひるごはん", zh: "午餐" },
-        { jp: "ばんごはん", zh: "晚餐" },
-        { jp: "パン", zh: "麵包" },
-        { jp: "たまご", zh: "蛋" },
-        { jp: "にく", zh: "肉" },
-        { jp: "さかな", zh: "魚" },
-        { jp: "やさい", zh: "蔬菜" },
-        { jp: "くだもの", zh: "水果" },
-        { jp: "みず", zh: "水" },
-        { jp: "おちゃ", zh: "茶" },
-        { jp: "こうちゃ", zh: "紅茶" },
-        { jp: "ぎゅうにゅう", zh: "牛奶" },
-        { jp: "ジュース", zh: "果汁" },
-        { jp: "ビール", zh: "啤酒" },
-        { jp: "おさけ", zh: "日本酒" },
-        { jp: "たばこ", zh: "香煙" },
-        { jp: "てがみ", zh: "信" },
-        { jp: "ほうこく", zh: "報告" },
-        { jp: "しゃしん", zh: "照片" },
-        { jp: "ビデオ", zh: "影片" },
-        { jp: "みせ", zh: "商店" },
-        { jp: "にわ", zh: "庭院" },
-        { jp: "しゅくだい", zh: "作業" },
-        { jp: "テニス", zh: "網球" },
-        { jp: "サッカー", zh: "足球" },
-        { jp: "はなみ", zh: "賞花" },
-        { jp: "なに", zh: "什麼" },
-        { jp: "いっしょに", zh: "一起" },
-        { jp: "ちょっと", zh: "一點點" },
-        { jp: "いつも", zh: "一直都是" },
-        { jp: "ときどき", zh: "有時" },
-        { jp: "それから", zh: "然後" },
-        { jp: "ええ", zh: "是的" },
-        { jp: "いいですね", zh: "好啊" },
-        { jp: "わかりました", zh: "我明白了" },
-        { jp: "なんですか", zh: "有什麼事？" },
-        { jp: "じゃ、また", zh: "那麼，再見" }
+const fullData = [
+  ["食べます", "吃"],
+        ["飲みます", "飲料"],
+        ["吸います", "吸"],
+        ["見ます", "看"],
+        ["聞きます", "聽"],
+        ["読みます", "閱讀"],
+        ["書きます", "書寫"],
+        ["買います", "購買"],
+        ["撮ります", "拍照"],
+        ["します", "做"],
+        ["会います", "見面"],
+        ["ごはん", "白飯"],
+        ["あさごはん", "早餐"],
+        ["ひるごはん", "午餐"],
+        ["ばんごはん", "晚餐"],
+        ["パン", "麵包"],
+        ["たまご", "蛋"],
+        ["にく", "肉"],
+        ["さかな", "魚"],
+        ["やさい", "蔬菜"],
+        ["くだもの", "水果"],
+        ["みず", "水"],
+        ["おちゃ", "茶"],
+        ["こうちゃ", "紅茶"],
+        ["ぎゅうにゅう", "牛奶"],
+        ["ジュース", "果汁"],
+        ["ビール", "啤酒"],
+        ["おさけ", "日本酒"],
+        ["たばこ", "香煙"],
+        ["てがみ", "信"],
+        ["ほうこく", "報告"],
+        ["しゃしん", "照片"],
+        ["ビデオ", "影片"],
+        ["みせ", "商店"],
+        ["にわ", "庭院"],
+        ["しゅくだい", "作業"],
+        ["テニス", "網球"],
+        ["サッカー", "足球"],
+        ["はなみ", "賞花"],
+        ["なに", "什麼"],
+        ["いっしょに", "一起"],
+        ["ちょっと", "一點點"],
+        ["いつも", "一直都是"],
+        ["ときどき", "有時"],
+        ["それから", "然後"],
+        ["ええ", "是的"],
+        ["いいですね", "好啊"],
+        ["わかりました", "我明白了"],
+        ["なんですか", "有什麼事？"],
+        ["じゃ、また", "那麼，再見"]
 ];
 
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
 }
 
-function createQuiz() {
-  let score = 0;
-  shuffle(quizData);
-  const allOptions = quizData.map(item => item.zh);
-  const quizContainer = document.getElementById("quiz");
+function startQuiz() {
+  const order = document.getElementById("mode-order").value;
+  const direction = document.getElementById("mode-direction").value;
 
-  quizData.forEach((item, index) => {
+  let data = fullData.slice();
+  if (order === "random") {
+    shuffle(data);
+    data = data.slice(0, 10); // 抽10題
+  }
+
+  const quizData = data.map(pair => {
+    return direction === "jp-zh" ? { question: pair[0], answer: pair[1] } : { question: pair[1], answer: pair[0] };
+  });
+
+  const allAnswers = quizData.map(q => q.answer);
+  document.getElementById("menu").style.display = "none";
+  const quizContainer = document.getElementById("quiz");
+  let score = 0;
+
+  quizData.forEach((q, index) => {
     const card = document.createElement("div");
     card.className = "card";
 
     const question = document.createElement("div");
     question.className = "question";
-    question.textContent = (index + 1) + ". " + item.jp;
+    question.textContent = `${index + 1}. ${q.question}`;
 
     const optionsDiv = document.createElement("div");
     optionsDiv.className = "options";
 
-    let options = [item.zh];
+    let options = [q.answer];
     while (options.length < 4) {
-      const opt = allOptions[Math.floor(Math.random() * allOptions.length)];
+      const opt = allAnswers[Math.floor(Math.random() * allAnswers.length)];
       if (!options.includes(opt)) options.push(opt);
     }
-
     shuffle(options);
+
     options.forEach(opt => {
       const btn = document.createElement("button");
       btn.textContent = opt;
       btn.onclick = () => {
-        if (opt === item.zh) {
+        if (opt === q.answer) {
           btn.classList.add("correct");
           score++;
         } else {
@@ -139,7 +154,7 @@ function createQuiz() {
         }
         Array.from(optionsDiv.children).forEach(b => b.disabled = true);
         if (index === quizData.length - 1) {
-          document.getElementById("result").textContent = "你答對了 " + score + " / " + quizData.length + " 題";
+          document.getElementById("result").textContent = `你答對了 ${score} / ${quizData.length} 題`;
           document.getElementById("restart-btn").style.display = "block";
         }
       };
@@ -151,8 +166,6 @@ function createQuiz() {
     quizContainer.appendChild(card);
   });
 }
-
-createQuiz();
 </script>
 
 </body>
