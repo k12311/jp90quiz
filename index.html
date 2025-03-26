@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>日文單字測驗</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f5f5f5; }
+        h1 { color: #333; }
+        .card { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+        .question { font-size: 24px; margin-bottom: 10px; }
+        .options button {
+            display: block;
+            margin: 5px 0;
+            padding: 10px;
+            width: 100%;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .correct { background-color: #c8f7c5; }
+        .incorrect { background-color: #f7c5c5; }
+    </style>
+</head>
+<body>
+
+<h1>日文 ➝ 中文 測驗</h1>
+
+<div id="quiz"></div>
+
+<script>
+    const quizData = [
+        { jp: "食べます", zh: "吃" },
+        { jp: "飲みます", zh: "喝" },
+        { jp: "見ます", zh: "看" },
+        { jp: "聞きます", zh: "聽" },
+        { jp: "ごはん", zh: "白飯" },
+        { jp: "みず", zh: "水" },
+        { jp: "おちゃ", zh: "茶" },
+        { jp: "ジュース", zh: "果汁" }
+    ];
+
+    const allOptions = quizData.map(q => q.zh);
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function createQuiz() {
+        const container = document.getElementById("quiz");
+        quizData.forEach((q, index) => {
+            const card = document.createElement("div");
+            card.className = "card";
+
+            const question = document.createElement("div");
+            question.className = "question";
+            question.textContent = `${index + 1}. ${q.jp}`;
+
+            const optionsDiv = document.createElement("div");
+            optionsDiv.className = "options";
+
+            let options = [q.zh];
+            while (options.length < 4) {
+                const opt = allOptions[Math.floor(Math.random() * allOptions.length)];
+                if (!options.includes(opt)) options.push(opt);
+            }
+
+            shuffle(options);
+            options.forEach(opt => {
+                const btn = document.createElement("button");
+                btn.textContent = opt;
+                btn.onclick = () => {
+                    if (opt === q.zh) {
+                        btn.className = "correct";
+                    } else {
+                        btn.className = "incorrect";
+                    }
+                    Array.from(optionsDiv.children).forEach(b => b.disabled = true);
+                };
+                optionsDiv.appendChild(btn);
+            });
+
+            card.appendChild(question);
+            card.appendChild(optionsDiv);
+            container.appendChild(card);
+        });
+    }
+
+    createQuiz();
+</script>
+
+</body>
+</html>
